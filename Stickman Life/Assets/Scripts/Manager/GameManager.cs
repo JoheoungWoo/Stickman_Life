@@ -17,6 +17,8 @@ public class GameManager : MonoBehaviour
 
     public bool IsPause => isPasue;
 
+    public SoundManager soundManager; // 사운드 매니저
+
     #region 루프할 요소들 객체
     public Body body { get; private set; }
     public Disease disease { get; private set; }
@@ -27,6 +29,7 @@ public class GameManager : MonoBehaviour
     public Life life { get; private set; }
     public Mental mental { get; private set; }
     #endregion
+
 
 
     public void InitGame(MainData mainData)
@@ -43,11 +46,21 @@ public class GameManager : MonoBehaviour
         isStart = true;
 
         Invoke("SetTargetFrameRate",2f);
+
+        soundManager.PlayMainBgm();
     }
+
 
     public void PauseGame()
     {
         isPasue = true;
+    }
+
+    public void EndGame()
+    {
+        isPasue = true;
+        soundManager.StopMainBgm();
+        Time.timeScale = 0;
     }
 
     public void ContinueGame()
@@ -55,19 +68,12 @@ public class GameManager : MonoBehaviour
         isPasue = false;
     }
 
-    public void RestartGame()
-    {
 
-    }
-
-    public void StopGame()
-    {
-
-    }
 
     public void SetTargetFrameRate()
     {
         Application.targetFrameRate = frameRate;
+        DataManager.Instance.InitUI();
     }
     private void Update()
     {

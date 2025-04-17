@@ -51,7 +51,7 @@ public class Level : Action
         mainData.nowExp = 0;
         mainData.maxExp = mainData.maxExp * 2;
         mainData.level += 1;
-        mainData.nowGold += 250;
+        mainData.nowGold += 200;
 
         mainData.SetBodyPoint(mainData.maxBodyPoint);
 

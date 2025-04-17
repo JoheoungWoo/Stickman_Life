@@ -51,7 +51,7 @@ public class Therapy : Action
             DataManager.Instance.uiManager.ChangeCancer(mainData.isCancer);
 
             //경험치 추가
-            mainData.AddExp(7);
+            //mainData.AddExp(10);
 
             //UI 반영
             DataManager.Instance.uiManager.ChangeGoldText(mainData.nowGold);

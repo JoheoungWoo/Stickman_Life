@@ -11,7 +11,10 @@ public class LogoSceneManager : MonoBehaviour
 
     public void Awake()
     {
-        Invoke("Fade", 3f);
+        if (PlayerPrefs.GetInt("Load") != 2)
+        {
+            Invoke("Fade", 3f);
+        }
     }
 
     void Fade()
@@ -22,7 +25,7 @@ public class LogoSceneManager : MonoBehaviour
 
     void NextScene()
     {
-        SF.FadeOff();
+        SF.setOff();
         LogoScene.gameObject.SetActive(false);
         StartScene.gameObject.SetActive(true);
     }

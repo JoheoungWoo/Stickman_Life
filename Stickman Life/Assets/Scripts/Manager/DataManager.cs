@@ -55,9 +55,13 @@ public class DataManager : MonoBehaviour
     }
 
     public MainData mainData;
+
+    //매니저들
     public UIManager uiManager;
     public SoundManager soundManager;
     public GameManager gameManager;
+    public AchievementManager achievementManager;
+
     public FoodItem foodItem;
     public DiseaseItem diseaseItem;
 
@@ -65,49 +69,22 @@ public class DataManager : MonoBehaviour
     public List<DiseaseData> newDiseaseItemList = new List<DiseaseData>();
     public List<SkillData> newSkillData = new List<SkillData>();
 
-    public ToolTip toolTip = new ToolTip();
     public GameObject toolTIpPrefab;
 
     public Transform toolTipParent;
 
 
+    public JsonDataManager jsonDataManager;
+
+    public PlayerData tempData;
+
     private void Start()
     {
         Init();
-        /*
-        foreach(var item in toolTip)
-        {
-
-            Debug.Log($"{ite}이며 {data}라는 정보입니다.");
-        }*/
-
-        var data = toolTip.FindToolTipData("운동").GetAllData();
-        Debug.Log($"{data.type}라는 것을 선택했고, {data.data}");
-
-        data = toolTip.FindToolTipData("환각").GetAllData();
-        Debug.Log($"{data.type}라는 것을 선택했고, {data.data}");
-
-
-        data = toolTip.FindToolTipData("취미").GetAllData();
-        Debug.Log($"{data.type}라는 것을 선택했고, {data.data}");
-
     }
 
-
-    private void Init()
+    public void InitUI()
     {
-        mainData = new MainData();
-
-        gameManager.InitGame(mainData);
-        uiManager.Init(mainData);
-
-        //값 초기화
-        mainData.SetBodyPoint(mainData.maxBodyPoint);
-        mainData.SetFoodPoint(mainData.originMaxFoodPoint);     //maxFoodPoint를 주면 건강이 20이 시작부터 감소가 되므로
-        mainData.SetHealthPoint(mainData.maxHealthPoint);
-        mainData.SetLifePoint(mainData.maxLifePoint);
-        mainData.SetMentalPoint(mainData.maxMentalPoint);
-
         //UI 반영
         uiManager.ChangeLevelText(mainData.level);
         uiManager.ChangeBodyBarText(mainData.GetBodyPoint());
@@ -118,6 +95,53 @@ public class DataManager : MonoBehaviour
 
         uiManager.ChangeGoldText(mainData.nowGold);
         uiManager.ChangeExpBarText();
+    }
+
+    private void Init()
+    {
+        mainData = new MainData();
+
+        jsonDataManager = new JsonDataManager();
+
+        try
+        {
+            if (!jsonDataManager.CheckExistFile("playerData"))
+            {
+                Debug.Log("json데이터가 없어서 초기화 하였습니다.");
+
+                //생성 , 초기화 , 로드의 과정을 거침
+                jsonDataManager.CreateData("playerData");
+                jsonDataManager.InitData("playerData");
+                mainData.InitData(jsonDataManager.LoadData("playerData").MainDataToPlayerData());
+            }
+            else
+            {
+                Debug.Log("json데이터가 있으므로 로드만 진행합니다.");
+                var tempData = jsonDataManager.LoadData("playerData").MainDataToPlayerData();
+                if (tempData.GetLifePoint() <= 0)
+                {
+                    //생성 , 초기화 , 로드의 과정을 거침
+                    jsonDataManager.CreateData("playerData");
+                    jsonDataManager.InitData("playerData");
+                    mainData.InitData(jsonDataManager.LoadData("playerData").MainDataToPlayerData());
+                }
+                else
+                {
+                    //데이터가 있으므로 바로 로드
+                    mainData.InitData(jsonDataManager.LoadData("playerData").MainDataToPlayerData());
+                }
+            }
+        }
+        catch (System.Exception error)
+        {
+            Debug.Log($"{error} 에러임");
+            //생성 , 초기화 , 로드의 과정을 거침
+            jsonDataManager.CreateData("playerData");
+            jsonDataManager.InitData("playerData");
+            mainData.InitData(jsonDataManager.LoadData("playerData").MainDataToPlayerData());
+        }
+
+        
 
         //사용되는 데이터 생성
         mainData.itemList.Add(new EatData(newItemList[0]));
@@ -133,9 +157,67 @@ public class DataManager : MonoBehaviour
         mainData.diseaseItemList.Add(new DiseaseData(newDiseaseItemList[4]));
 
 
+        gameManager.InitGame(mainData);
+        uiManager.Init(mainData);
+        achievementManager.Init(mainData);
+        InitUI();
+
         //null방지
         foodItem?.Init(mainData.itemList);
         diseaseItem?.Init(mainData.diseaseItemList);
+
+    }
+
+    public void SaveData(MainData mainData)
+    {
+        jsonDataManager.UpdateData(
+            new PlayerData
+            {
+                retryCount = 0,
+                playerName = "savePlayer",
+                lifePoint = mainData.GetLifePoint(),
+                maxLifePoint = mainData.maxLifePoint,
+                healthPoint = mainData.GetHealthPoint(),
+                maxHealthPoint = mainData.maxHealthPoint,
+                bodyPoint = mainData.GetBodyPoint(),
+                maxBodyPoint = mainData.maxBodyPoint,
+                mentalPoint = mainData.GetMentalPoint(),
+                maxMentalPoint = mainData.maxMentalPoint,
+                foodPoint = mainData.GetFoodPoint(),
+                maxFoodPoint = mainData.maxFoodPoint,
+                gold = mainData.nowGold,
+                timeSpan = mainData.timeSpan,
+
+                increaseLifePoint = mainData.lifeUpLevel,
+                increaseHealthPoint = mainData.healthUpLevel,
+                increaseHealthRecoveryPoint = mainData.healthRepairLevel,
+                increaseGoldProsperityPoint = mainData.goldUpLevel,
+
+                isFoodPoisoning = mainData.isFoodPoisoning,
+                isHallucination = mainData.isHallucination,
+                isCold = mainData.isCold,
+                isCancer = mainData.isCancer,
+                exp = mainData.nowExp,
+                maxExp = mainData.maxExp,
+                level = mainData.level,
+
+                dietarysupplementCount = mainData.dietarysupplementCount,
+
+                foodPoisoningCount = mainData.foodPoisoningCount,
+                hallucinationCount = mainData.hallucinationCount,
+                coldCount = mainData.coldCount,
+                cancerCount = mainData.cancerCount,
+
+                candyCount = mainData.candyCount,
+                chipCount = mainData.chipCount,
+                ramyunCount = mainData.ramyunCount,
+                kimbabCount = mainData.kimbabCount,
+                meatCount = mainData.meatCount,
+            }, "playerData");
+    }
+
+    public void Delete() {
+        jsonDataManager.ClearData("playerData");
     }
 
     public void OpenCheckItemUI(string itemName)
@@ -151,8 +233,15 @@ public class DataManager : MonoBehaviour
             GetComponent<TMPro.TMP_Text>().text = GetItemExplanation(itemName);
     }
 
+
     public void OpenCheckSkillUI(string itemName)
     {
+        Debug.Log($"{itemName} 아이템 이름");
+       if (IsMaxLevel(itemName))
+        {
+            return;
+        }
+
         uiManager.OpenSkillCheckWindow();
         uiManager.skillCheckUIObj.transform.GetChild(0).GetChild(1).
             GetComponent<UnityEngine.UI.Image>().sprite = GetSprite(itemName);
@@ -211,8 +300,8 @@ public class DataManager : MonoBehaviour
             case nameof(SkillName.IncreaseHealthBtn):
                 mySprite = newSkillData[(int)SkillName.IncreaseHealthBtn].skillImage;
                 break;
-            case nameof(SkillName.IncreaseBodyRecoveryBtn):
-                mySprite = newSkillData[(int)SkillName.IncreaseBodyRecoveryBtn].skillImage;
+            case nameof(SkillName.IncreaseHealthRecoveryBtn):
+                mySprite = newSkillData[(int)SkillName.IncreaseHealthRecoveryBtn].skillImage;
                 break;
             case nameof(SkillName.IncreaseGoldProsperityBtn):
                 mySprite = newSkillData[(int)SkillName.IncreaseGoldProsperityBtn].skillImage;
@@ -270,9 +359,9 @@ public class DataManager : MonoBehaviour
                 //myString = newSkillData[(int)SkillName.IncreaseHealthBtn].myItemName.ToString();
                 myString = $"체력 증가 LV {mainData.healthUpLevel + 1}";
                 break;
-            case nameof(SkillName.IncreaseBodyRecoveryBtn):
+            case nameof(SkillName.IncreaseHealthRecoveryBtn):
                 //myString = newSkillData[(int)SkillName.IncreaseBodyRecoveryBtn].myItemName.ToString();
-                myString = $"건강 재생 증가 LV {mainData.healthRepairLevel + 1}";
+                myString = $"체력 재생 증가 LV {mainData.healthRepairLevel + 1}";
                 break;
             case nameof(SkillName.IncreaseGoldProsperityBtn):
                 //myString = newSkillData[(int)SkillName.IncreaseGoldProsperityBtn].myItemName.ToString();
@@ -322,16 +411,60 @@ public class DataManager : MonoBehaviour
 
             //스킬의 목록만 정의
             case nameof(SkillName.IncreaseLifeBtn):
-                myPrice = newSkillData[(int)SkillName.IncreaseLifeBtn].itemPrice;
+                if (mainData.lifeUpLevel == 0)
+                {
+                    myPrice = mainData.lifeUpGoldArr[0];
+                }
+                else if (mainData.lifeUpLevel == 1)
+                {
+                    myPrice = mainData.lifeUpGoldArr[1];
+                }
+                else if (mainData.lifeUpLevel == 2)
+                {
+                    myPrice = mainData.lifeUpGoldArr[2];
+                }
                 break;
             case nameof(SkillName.IncreaseHealthBtn):
-                myPrice = newSkillData[(int)SkillName.IncreaseHealthBtn].itemPrice;
+                if (mainData.healthUpLevel == 0)
+                {
+                    myPrice = mainData.healthUpGoldArr[0];
+                }
+                else if (mainData.healthUpLevel == 1)
+                {
+                    myPrice = mainData.healthUpGoldArr[1];
+                }
+                else if (mainData.healthUpLevel == 2)
+                {
+                    myPrice = mainData.healthUpGoldArr[2];
+                }
                 break;
-            case nameof(SkillName.IncreaseBodyRecoveryBtn):
-                myPrice = newSkillData[(int)SkillName.IncreaseBodyRecoveryBtn].itemPrice;
+            case nameof(SkillName.IncreaseHealthRecoveryBtn):
+                if (mainData.healthRepairLevel == 0)
+                {
+                    myPrice = mainData.healthRepairUpGoldArr[0];
+                }
+                else if (mainData.healthRepairLevel == 1)
+                {
+                    myPrice = mainData.healthRepairUpGoldArr[1];
+                }
+                else if (mainData.healthRepairLevel == 2)
+                {
+                    myPrice = mainData.healthRepairUpGoldArr[2];
+                }
                 break;
             case nameof(SkillName.IncreaseGoldProsperityBtn):
-                myPrice = newSkillData[(int)SkillName.IncreaseGoldProsperityBtn].itemPrice;
+                if (mainData.goldUpLevel == 0)
+                {
+                    myPrice = mainData.goldUpGoldArr[0];
+                }
+                else if (mainData.goldUpLevel == 1)
+                {
+                    myPrice = mainData.goldUpGoldArr[1];
+                }
+                else if (mainData.goldUpLevel == 2)
+                {
+                    myPrice = mainData.goldUpGoldArr[2];
+                }
                 break;
         }
         return myPrice.ToString();
@@ -378,16 +511,60 @@ public class DataManager : MonoBehaviour
 
             //스킬의 목록만 정의
             case nameof(SkillName.IncreaseLifeBtn):
-                myString = newSkillData[(int)SkillName.IncreaseLifeBtn].itemExplanation;
+                if (mainData.lifeUpLevel == 0)
+                {
+                    myString = $"생명력이 {mainData.lifeUpArr[0]} 증가합니다.";
+                }
+                else if (mainData.lifeUpLevel == 1)
+                {
+                    myString = $"생명력이 {mainData.lifeUpArr[1]} 증가합니다.";
+                }
+                else if (mainData.lifeUpLevel == 2)
+                {
+                    myString = $"생명력이 {mainData.lifeUpArr[2]} 증가합니다.";
+                }
                 break;
             case nameof(SkillName.IncreaseHealthBtn):
-                myString = newSkillData[(int)SkillName.IncreaseHealthBtn].itemExplanation;
+                if (mainData.healthUpLevel == 0)
+                {
+                    myString = $"체력이 {mainData.healthUpArr[0]} 증가합니다.";
+                }
+                else if (mainData.healthUpLevel == 1)
+                {
+                    myString = $"체력이 {mainData.healthUpArr[1]} 증가합니다.";
+                }
+                else if (mainData.healthUpLevel == 2)
+                {
+                    myString = $"체력이 {mainData.healthUpArr[2]} 증가합니다.";
+                }
                 break;
-            case nameof(SkillName.IncreaseBodyRecoveryBtn):
-                myString = newSkillData[(int)SkillName.IncreaseBodyRecoveryBtn].itemExplanation;
+            case nameof(SkillName.IncreaseHealthRecoveryBtn):
+                if (mainData.healthRepairLevel == 0)
+                {
+                    myString = $"체력이 {mainData.healthRepairArr[0]}초당 1씩 추가로 회복됩니다.";
+                }
+                else if (mainData.healthRepairLevel == 1)
+                {
+                    myString = $"체력이 {mainData.healthRepairArr[1]}초당 1씩 추가로 회복됩니다.";
+                }
+                else if (mainData.healthRepairLevel == 2)
+                {
+                    myString = $"체력이 {mainData.healthRepairArr[2]}초당 1씩 추가로 회복됩니다.";
+                }
                 break;
             case nameof(SkillName.IncreaseGoldProsperityBtn):
-                myString = newSkillData[(int)SkillName.IncreaseGoldProsperityBtn].itemExplanation;
+                if (mainData.goldUpLevel == 0)
+                {
+                    myString = $"골드를 {mainData.goldUpArr[0]}초당 1씩 추가로 획득합니다.";
+                }
+                else if (mainData.goldUpLevel == 1)
+                {
+                    myString = $"골드를 {mainData.goldUpArr[1]}초당 1씩 추가로 획득합니다.";
+                }
+                else if (mainData.goldUpLevel == 2)
+                {
+                    myString = $"골드를 {mainData.goldUpArr[2]}초당 1씩 추가로 획득합니다.";
+                }
                 break;
         }
         return myString;
@@ -426,6 +603,7 @@ public class DataManager : MonoBehaviour
                     uiManager.PrintError("골드가 부족합니다.");
                 } else
                 {
+                    mainData.candyCount += 1;
                     mainData.AddExp(4);
                     uiManager.ChangeExpBarText();
                 }
@@ -437,28 +615,31 @@ public class DataManager : MonoBehaviour
                 }
                 else
                 {
+                    mainData.chipCount += 1;
                     mainData.AddExp(4);
                     uiManager.ChangeExpBarText();
                 }
                 break;
             case nameof(fooditemName.컵라면):
-                if(!gameManager.food.UpFoodStatus(20, 30))
+                if(!gameManager.food.UpFoodStatus(20, 25))
                 {
                     uiManager.PrintError("골드가 부족합니다.");
                 }
                 else
                 {
+                    mainData.ramyunCount += 1;
                     mainData.AddExp(4);
                     uiManager.ChangeExpBarText();
                 }
                 break;
             case nameof(fooditemName.김밥):
-                if(!gameManager.food.UpFoodStatus(25, 40))
+                if(!gameManager.food.UpFoodStatus(30, 40))
                 {
                     uiManager.PrintError("골드가 부족합니다.");
                 }
                 else
                 {
+                    mainData.kimbabCount += 1;
                     mainData.AddExp(4);
                     uiManager.ChangeExpBarText();
                 }
@@ -470,6 +651,7 @@ public class DataManager : MonoBehaviour
                 }
                 else
                 {
+                    mainData.meatCount += 1;
                     mainData.AddExp(4);
                     uiManager.ChangeExpBarText();
                 }
@@ -483,7 +665,7 @@ public class DataManager : MonoBehaviour
         switch (itemName)
         {
             case nameof(medicineItemName.영양수액):
-                switch(gameManager.disease.TreatFoodPoisoning(75)) {
+                switch(gameManager.disease.TreatFoodPoisoning(60)) {
                     case -1:
                         uiManager.PrintError("골드가 부족합니다.");
                         break;
@@ -491,7 +673,8 @@ public class DataManager : MonoBehaviour
                         uiManager.PrintError("식중독 상태가 아닙니다.");
                         break;
                     case 1:
-                        mainData.AddExp(7);
+                        mainData.foodPoisoningCount += 1;
+                        mainData.AddExp(10);
                         uiManager.ChangeExpBarText();
                         break;
                     default:
@@ -499,7 +682,7 @@ public class DataManager : MonoBehaviour
                 }
                 break;
             case nameof(medicineItemName.향정신성약):
-                switch (gameManager.disease.TreatHallucination(75))
+                switch (gameManager.disease.TreatHallucination(60))
                 {
                     case -1:
                         uiManager.PrintError("골드가 부족합니다.");
@@ -508,7 +691,8 @@ public class DataManager : MonoBehaviour
                         uiManager.PrintError("환각 상태가 아닙니다.");
                         break;
                     case 1:
-                        mainData.AddExp(7);
+                        mainData.hallucinationCount += 1;
+                        mainData.AddExp(10);
                         uiManager.ChangeExpBarText();
                         break;
                     default:
@@ -516,7 +700,7 @@ public class DataManager : MonoBehaviour
                 }
                 break;
             case nameof(medicineItemName.감기약):
-                switch (gameManager.disease.TreatCold(75))
+                switch (gameManager.disease.TreatCold(60))
                 {
                     case -1:
                         uiManager.PrintError("골드가 부족합니다.");
@@ -525,7 +709,8 @@ public class DataManager : MonoBehaviour
                         uiManager.PrintError("감기 상태가 아닙니다.");
                         break;
                     case 1:
-                        mainData.AddExp(7);
+                        mainData.coldCount += 1;
+                        mainData.AddExp(10);
                         uiManager.ChangeExpBarText();
                         break;
                     default:
@@ -533,7 +718,7 @@ public class DataManager : MonoBehaviour
                 }
                 break;
             case nameof(medicineItemName.항암제):
-                switch (gameManager.disease.TreatCancer(100))
+                switch (gameManager.disease.TreatCancer(60))
                 {
                     case -1:
                         uiManager.PrintError("골드가 부족합니다.");
@@ -542,7 +727,8 @@ public class DataManager : MonoBehaviour
                         uiManager.PrintError("암 상태가 아닙니다.");
                         break;
                     case 1:
-                        mainData.AddExp(7);
+                        mainData.cancerCount += 1;
+                        mainData.AddExp(10);
                         uiManager.ChangeExpBarText();
                         break;
                     default:
@@ -550,13 +736,14 @@ public class DataManager : MonoBehaviour
                 }
                 break;
             case nameof(medicineItemName.건강보조제):
-                switch (gameManager.disease.TreatBodyPoint(60))
+                switch (gameManager.disease.TreatBodyPoint(40))
                 {
                     case -1:
                         uiManager.PrintError("골드가 부족합니다.");
                         break;
                     case 1:
-                        mainData.AddExp(7);
+                        mainData.dietarysupplementCount += 1; //1씩 카운트 증가
+                        mainData.AddExp(10);
                         uiManager.ChangeExpBarText();
                         break;
                     default:
@@ -564,6 +751,30 @@ public class DataManager : MonoBehaviour
                 }
                 break;
         }
+    }
+
+    public bool IsMaxLevel(string itemName)
+    {
+        bool tempBool = false;
+        switch (itemName)
+        {
+            case nameof(SkillName.IncreaseLifeBtn):
+                tempBool = mainData.lifeUpLevel == mainData.lifeUpMaxLevel;
+                break;
+            case nameof(SkillName.IncreaseHealthBtn):
+                tempBool = mainData.healthUpLevel == mainData.healthUpMaxLevel;
+                break;
+            case nameof(SkillName.IncreaseHealthRecoveryBtn):
+                tempBool = mainData.healthRepairLevel == mainData.healthRepairMaxLevel;
+                break;
+            case nameof(SkillName.IncreaseGoldProsperityBtn):
+                tempBool = mainData.goldUpLevel == mainData.goldUpMaxLevel;
+                break;
+            default:
+                tempBool = false;
+                break;
+        }
+        return tempBool;
     }
 
     private void UpgradeSkill(string itemName)
@@ -576,7 +787,7 @@ public class DataManager : MonoBehaviour
             case nameof(SkillName.IncreaseHealthBtn):
                 uiManager.HealthUp();
                 break;
-            case nameof(SkillName.IncreaseBodyRecoveryBtn):
+            case nameof(SkillName.IncreaseHealthRecoveryBtn):
                 uiManager.HealthRecoveryUp();
                 break;
             case nameof(SkillName.IncreaseGoldProsperityBtn):
@@ -619,6 +830,8 @@ public class DataManager : MonoBehaviour
     {
         soundManager.PlayBgm3();
     }
+
+    
 
     #endregion
 }

@@ -82,4 +82,14 @@ public class StartFader : MonoBehaviour
     {
         Fade.gameObject.SetActive(false);
     }
+
+    public void setOff()
+    {
+        Fade.gameObject.SetActive(true);
+        Color alpha = Fade.color;
+        alpha.a = 0f;
+        Fade.color = alpha;
+        FadeOff();
+    }
+
 }

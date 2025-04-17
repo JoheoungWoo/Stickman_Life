@@ -11,6 +11,9 @@ public class Body : Action
 
     private int downBody;
 
+    private float cancernowTimer = 0f;
+    private float cancerMaxTimer = 5f;
+
     private MainData mainData;
 
     public Body(MainData mainData)
@@ -31,7 +34,19 @@ public class Body : Action
         }
     }
 
-    
+    public bool CheckIsCancer()
+    {
+        if (mainData.isCancer)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+
 
     public void MinusBodyPoint(int minusLifePoint)
     {
@@ -66,6 +81,7 @@ public class Body : Action
         downBody = mainData.bodyPenaltyDelay[mainData.level - 1].value;
     }
 
+
     public void DownBodyPoint(float timer)
     {
         CheckBodyPoint();
@@ -74,17 +90,23 @@ public class Body : Action
         nowTimer += timer;
         if (nowTimer >= maxTimer)
         {
-            var minusPanaltyBody = 0;
-            if (mainData.isCancer)
-            {
-                minusPanaltyBody = 5;
-            }
-            Debug.Log($"건강 : 레벨{mainData.level} {nowTimer}마다 {(downBody + minusPanaltyBody)}만큼 감소됨");
+            Debug.Log($"건강 : 레벨{mainData.level} {nowTimer}마다 {(downBody)}만큼 감소됨");
             nowTimer = 0;
-            mainData.SetBodyPoint(mainData.GetBodyPoint() - (downBody + minusPanaltyBody) <= 0 ?
-                0 : mainData.GetBodyPoint() - (downBody + minusPanaltyBody)
+            mainData.SetBodyPoint(mainData.GetBodyPoint() - (downBody) <= 0 ?
+                0 : mainData.GetBodyPoint() - (downBody)
                 );
             DataManager.Instance.uiManager.ChangeBodyBarText(mainData.GetBodyPoint());
+        }
+    }
+
+    public void Cancer(float delay)
+    {
+        cancernowTimer += delay;
+        if (cancernowTimer >= cancerMaxTimer)
+        {
+            cancernowTimer = 0;
+            MinusBodyPoint(3);
+            Debug.Log($"건강 암으로 인하여 : 레벨{mainData.level} {cancerMaxTimer}마다 {3}만큼 감소됨");
         }
     }
 
@@ -100,6 +122,14 @@ public class Body : Action
         } else
         {
             isBodyFullPanelty = false;
+        }
+
+        if (CheckIsCancer())
+        {
+            Cancer(Time.deltaTime);
+        } else
+        {
+
         }
 
         DownBodyPoint(Time.deltaTime);

@@ -19,7 +19,10 @@ public class StartSceneManager : MonoBehaviour
 
     public GameObject Load; // 로드 게이지 오브젝트
 
-    public GameObject StartButton; // 게임시작 버튼
+    public GameObject MenuScene; // 메뉴 씬
+
+    public GameObject StartScene; // 시작 씬
+
 
     public void Awake()
     {
@@ -39,6 +42,9 @@ public class StartSceneManager : MonoBehaviour
 
             b = time * 100;
             GageText = (int)b;
+
+            if (GageText > 100)
+                GageText = 100;
 
             Text.text = GageText + " %";
 
@@ -61,8 +67,10 @@ public class StartSceneManager : MonoBehaviour
     public void LoadDelete02()
     {
         Load.gameObject.SetActive(false);
-        StartButton.gameObject.SetActive(true);
+        StartScene.gameObject.SetActive(false);
+        MenuScene.gameObject.SetActive(true);
     }
 
     #endregion
+
 }

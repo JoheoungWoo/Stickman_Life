@@ -12,14 +12,13 @@ public class SoundManager : MonoBehaviour
     private AudioSource audioSourceBGM;
     private AudioSource audioSourceButtonClick;
 
-    void Start()
+    void Awake()
     {
         // 배경음악을 위한 AudioSource를 추가하고 초기 BGM 설정
         audioSourceBGM = gameObject.AddComponent<AudioSource>();
         audioSourceBGM.clip = mainBgm;
         audioSourceBGM.loop = true; // 배경음악은 반복 재생
         audioSourceBGM.volume = 0.08f;
-        PlayMainBgm();
 
         // 버튼 클릭 사운드를 위한 AudioSource를 추가
         audioSourceButtonClick = gameObject.AddComponent<AudioSource>();
@@ -44,6 +43,11 @@ public class SoundManager : MonoBehaviour
         }
     }
 
+
+    public void StopMainBgm()
+    {
+        audioSourceBGM.Stop();
+    }
     public void PlayMainBgm()
     {
         // 기존 BGM 중지 및 mainBgm 재생

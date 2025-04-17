@@ -7,7 +7,7 @@ using System.Collections.Generic;
 public enum DiseaseName { None = -1, FoodPoisoning, Hallucination, Cold, Cancer }
 public enum StatusName { None = -1, Life, Health, Body, Mental, Food }
 public enum ButtonName { None = -1, Work, Hobby, Eat, Therapy, Skill }
-public enum SkillName {None = -1, IncreaseLifeBtn, IncreaseHealthBtn, IncreaseBodyRecoveryBtn, IncreaseGoldProsperityBtn}
+public enum SkillName {None = -1, IncreaseLifeBtn, IncreaseHealthBtn, IncreaseHealthRecoveryBtn, IncreaseGoldProsperityBtn}
 
 //아이템 리스트
 public enum medicineItemName { None = -1,영양수액, 향정신성약, 감기약, 항암제, 건강보조제 }
@@ -95,25 +95,29 @@ public class MainData
     public bool workBool;           //운동 버튼을 눌렀는지
     #endregion
 
+    public int retryCount = 0;
+    public string playerName = "test";
+    public float timeSpan;
+
     public int lifeUpLevel = 0;
     public int lifeUpMaxLevel = 3;
-    private int[] lifeUpArr = {5,10,15};
-    private int[] lifeUpGoldArr = {50,100,200};
+    public int[] lifeUpArr = {5,10,15};
+    public int[] lifeUpGoldArr = {50,100,200};
 
     public int healthUpLevel = 0;
     public int healthUpMaxLevel = 3;
-    private int[] healthUpArr = { 10,10,10};
-    private int[] healthUpGoldArr = {70,85,100};
+    public int[] healthUpArr = { 10,10,10};
+    public int[] healthUpGoldArr = {70,85,100};
 
     public int healthRepairLevel = 0;
     public int healthRepairMaxLevel = 3;
     public int[] healthRepairArr = { 4, 3, 2 };
-    private int[] healthRepairUpGoldArr = {50,100,200};
+    public int[] healthRepairUpGoldArr = {50,100,200};
 
     public int goldUpLevel = 0;
     public int goldUpMaxLevel = 3;
     public int[] goldUpArr = { 4, 3, 2 };
-    private int[] goldUpGoldArr = {100,200,300};
+    public int[] goldUpGoldArr = {100,200,300};
 
     public int nowGold = 100;           //골드 보유량
     public int maxGold = 9999;           //최대 골드 보유량
@@ -155,11 +159,11 @@ public class MainData
     private int mentalPoint;            //정신력
     public int maxMentalPoint = 100;   //최대 정신력
     public ReduceByLevel<float, int>[] mentalDelay = {
+        new ReduceByLevel<float, int>(5f, 1),
+        new ReduceByLevel<float, int>(4.5f, 1),
+        new ReduceByLevel<float, int>(4f, 1),
         new ReduceByLevel<float, int>(3.5f, 1),
-        new ReduceByLevel<float, int>(3f, 1),
-        new ReduceByLevel<float, int>(2.5f, 1),
-        new ReduceByLevel<float, int>(2f, 1),
-        new ReduceByLevel<float, int>(1.5f, 1)
+        new ReduceByLevel<float, int>(3f, 1)
     };
 
 
@@ -169,11 +173,11 @@ public class MainData
     public int panaltyMaxFoodPoint = 50;        //식중독이면 최대 값
 
     public ReduceByLevel<float, int>[] foodDelay = { 
+        new ReduceByLevel<float, int>(6f, 1),
+        new ReduceByLevel<float, int>(5.5f, 1),
         new ReduceByLevel<float, int>(5f, 1),
         new ReduceByLevel<float, int>(4.5f, 1),
-        new ReduceByLevel<float, int>(4f, 1),
-        new ReduceByLevel<float, int>(3.5f, 1),
-        new ReduceByLevel<float, int>(3f, 1)
+        new ReduceByLevel<float, int>(4f, 1)
     };
 
     public ReduceByLevel<float, int>[] foodPenaltyDelay = {
@@ -183,6 +187,21 @@ public class MainData
         new ReduceByLevel<float, int>(2.5f, 1),
         new ReduceByLevel<float, int>(2f, 1)
     };
+
+    //업적 체크를 위함
+    public int dietarysupplementCount = 0;
+
+    public int foodPoisoningCount = 0;
+    public int hallucinationCount = 0;
+    public int coldCount = 0;
+    public int cancerCount = 0;
+
+    public int candyCount = 0;
+    public int chipCount = 0;
+    public int ramyunCount = 0;
+    public int kimbabCount = 0;
+    public int meatCount = 0;
+
 
     #region 상점 데이터 식사
     public List<EatData> itemList = new List<EatData>();
@@ -258,6 +277,28 @@ public class MainData
     /// <summary>
     /// -1은 골드부족 , -2는 레벨이 맥스인 경우 , 1은 성공
     /// </summary>
+    /// 
+
+    public void UpdateLifeSkill()
+    {
+        
+    }
+
+    public void UpdateHealthSkill()
+    {
+
+    }
+
+    public void UpdateHealthRepairSkill()
+    {
+
+    }
+
+    public void UpdateGoldSkill()
+    {
+
+    }
+
     public int UpLifeSkill()
     {
         //0 1 2인데 maxLevel은 3이므로 -1 해줌
@@ -351,4 +392,152 @@ public class MainData
         }
     }
     #endregion
+
+    public MainData()
+    {
+
+    }
+
+    public void Init()
+    {
+        lifeUpMaxLevel = 3;
+        lifeUpArr = new int[] { 5, 10, 15 };
+        lifeUpGoldArr = new int[] { 50, 100, 200 };
+        healthUpMaxLevel = 3;
+        healthUpArr = new int[] { 10, 10, 10 };
+        healthUpGoldArr = new int[] { 70, 85, 100 };
+        healthRepairMaxLevel = 3;
+        healthRepairArr = new int[] { 4, 3, 2 };
+        healthRepairUpGoldArr = new int[] { 50, 100, 200 };
+        goldUpMaxLevel = 3;
+        healthRepairArr = new int[] { 4, 3, 2 };
+        healthRepairUpGoldArr = new int[] { 50, 100, 200 };
+        goldUpMaxLevel = 3;
+        goldUpArr = new int[] { 4, 3, 2 };
+        goldUpGoldArr = new int[] { 100, 200, 300 };
+        lifePenaltyDelay = new ReduceByLevel<float, int>[]{ //건강에 의하여 감소
+            new ReduceByLevel<float, int>(5f, 3),
+        new ReduceByLevel<float, int>(5f, 6),
+        new ReduceByLevel<float, int>(5f, 9)
+        };
+        bodyDelay = new ReduceByLevel<float, int>[]{
+            new ReduceByLevel<float, int>(8f, 2),
+        new ReduceByLevel<float, int>(7f, 2),
+        new ReduceByLevel<float, int>(6f, 2),
+        new ReduceByLevel<float, int>(5f, 2),
+        new ReduceByLevel<float, int>(4f, 2)
+            };
+
+        bodyPenaltyDelay = new ReduceByLevel<float, int>[]{
+            new ReduceByLevel<float, int>(8f, 4),
+        new ReduceByLevel<float, int>(7f, 4),
+        new ReduceByLevel<float, int>(6f, 4),
+        new ReduceByLevel<float, int>(5f, 4),
+        new ReduceByLevel<float, int>(4f, 4)
+            };
+
+        mentalDelay = new ReduceByLevel<float, int>[]{
+            new ReduceByLevel<float, int>(5f, 1),
+        new ReduceByLevel<float, int>(4.5f, 1),
+        new ReduceByLevel<float, int>(4f, 1),
+        new ReduceByLevel<float, int>(3.5f, 1),
+        new ReduceByLevel<float, int>(3f, 1)
+            };
+        foodDelay = new ReduceByLevel<float, int>[]{
+            new ReduceByLevel<float, int>(6f, 1),
+        new ReduceByLevel<float, int>(5.5f, 1),
+        new ReduceByLevel<float, int>(5f, 1),
+        new ReduceByLevel<float, int>(4.5f, 1),
+        new ReduceByLevel<float, int>(4f, 1)
+            };
+        foodPenaltyDelay = new ReduceByLevel<float, int>[]{
+            new ReduceByLevel<float, int>(4f, 1),
+        new ReduceByLevel<float, int>(3.5f, 1),
+        new ReduceByLevel<float, int>(3f, 1),
+        new ReduceByLevel<float, int>(2.5f, 1),
+        new ReduceByLevel<float, int>(2f, 1)
+            };
+    }
+
+    public MainData(int retryCount, string playerName, int lifePoint, int maxLifePoint, int healthPoint, int maxHealthPoint, int bodyPoint, int maxBodyPoint, int mentalPoint,
+    int maxMentalPoint , int foodPoint, int maxFoodPoint, int gold, float timeSpan, int increaseLifePoint, int increaseHealthPoint, int increaseHealthRecoveryPoint,
+       int increaseGoldProsperityPoint, bool isFoodPoisoning, bool isHallucination, bool isCold,bool isCancer, int exp,int maxExp, int level,
+       int dietarysupplementCount, int foodPoisoningCount, int hallucinationCount, int coldCount, int cancerCount,
+       int candyCount, int chipCount, int ramyunCount, int kimbabCount, int meatCount)
+    {
+        this.retryCount = retryCount;
+        this.playerName = playerName;
+        SetLifePoint(lifePoint);
+        this.maxLifePoint = maxLifePoint;
+        SetHealthPoint(healthPoint);
+        this.maxHealthPoint = maxHealthPoint;
+        SetBodyPoint(bodyPoint);
+        this.maxBodyPoint = maxBodyPoint;
+        SetMentalPoint(mentalPoint);
+        this.maxMentalPoint = maxMentalPoint;
+        SetFoodPoint(foodPoint);
+        this.maxFoodPoint = maxFoodPoint;
+        this.nowGold = gold;
+        this.timeSpan = timeSpan;
+        lifeUpLevel = increaseLifePoint;
+        healthUpLevel = increaseHealthPoint;
+        healthRepairLevel = increaseHealthRecoveryPoint;
+        goldUpLevel = increaseGoldProsperityPoint;
+        this.isFoodPoisoning = isFoodPoisoning;
+        this.isHallucination = isHallucination;
+        this.isCold = isCold;
+        this.isCancer = isCancer;
+        this.nowExp = exp;
+        this.maxExp = maxExp;
+        this.level = level;
+        this.dietarysupplementCount = dietarysupplementCount;
+        this.foodPoisoningCount = foodPoisoningCount;
+        this.hallucinationCount = hallucinationCount;
+        this.coldCount = coldCount;
+        this.cancerCount = cancerCount;
+        this.candyCount = candyCount;
+        this.chipCount = chipCount;
+        this.ramyunCount = ramyunCount;
+        this.kimbabCount = kimbabCount;
+        this.meatCount = meatCount;
+    }
+
+    public void InitData(MainData mainData)
+    {
+        this.retryCount = mainData.retryCount;
+        this.playerName = mainData.playerName;
+        SetLifePoint(mainData.lifePoint);
+        this.maxLifePoint = mainData.maxLifePoint;
+        SetHealthPoint(mainData.healthPoint);
+        this.maxHealthPoint = mainData.maxHealthPoint;
+        SetBodyPoint(mainData.bodyPoint);
+        this.maxBodyPoint = mainData.maxBodyPoint;
+        SetMentalPoint(mainData.mentalPoint);
+        this.maxMentalPoint = mainData.maxMentalPoint;
+        SetFoodPoint(mainData.foodPoint);
+        this.maxFoodPoint = mainData.maxFoodPoint;
+        this.nowGold = mainData.nowGold;
+        this.timeSpan = mainData.timeSpan;
+        this.lifeUpLevel = mainData.lifeUpLevel;
+        this.healthUpLevel = mainData.healthUpLevel;
+        this.healthRepairLevel = mainData.healthRepairLevel;
+        this.goldUpLevel = mainData.goldUpLevel;
+        this.isFoodPoisoning = mainData.isFoodPoisoning;
+        this.isHallucination = mainData.isHallucination;
+        this.isCold = mainData.isCold;
+        this.isCancer = mainData.isCancer;
+        this.nowExp = mainData.nowExp;
+        this.maxExp = mainData.maxExp;
+        this.level = mainData.level;
+        this.dietarysupplementCount = mainData.dietarysupplementCount;
+        this.foodPoisoningCount = mainData.foodPoisoningCount;
+        this.hallucinationCount = mainData.hallucinationCount;
+        this.coldCount = mainData.coldCount;
+        this.cancerCount = mainData.cancerCount;
+        this.candyCount = mainData.candyCount;
+        this.chipCount = mainData.chipCount;
+        this.ramyunCount = mainData.ramyunCount;
+        this.kimbabCount = mainData.kimbabCount;
+        this.meatCount = mainData.meatCount;
+    }
 }

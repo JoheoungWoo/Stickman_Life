@@ -14,7 +14,7 @@ public class Food : Action
     public Food(MainData mainData)
     {
         this.mainData = mainData;
-        CheckFoodPoint();
+        //CheckFoodPoint();
     }
 
     public bool UpFoodStatus(int plusValue, int price)

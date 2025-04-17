@@ -31,7 +31,7 @@ public class ClickBtn : MonoBehaviour , IPointerClickHandler
                 SetCheckUI(ShopType.Skill);
                 DataManager.Instance.PlayBGM2();
                 break;
-            case "IncreaseBodyRecoveryBtn":
+            case "IncreaseHealthRecoveryBtn":
                 SetCheckUI(ShopType.Skill);
                 DataManager.Instance.PlayBGM2();
                 break;
@@ -41,6 +41,24 @@ public class ClickBtn : MonoBehaviour , IPointerClickHandler
                 break;
             case "SkillBuyBtn":
                 SkillBuyItem();
+                break;
+            case "SpeedTwiceBtn":
+                DataManager.Instance.PlayBGM3();
+                break;
+            case "EscapeBtn":
+                DataManager.Instance.PlayBGM3();
+                break;
+            case "ContinueBtn":
+                DataManager.Instance.PlayBGM3();
+                Debug.Log("BGM 재생됨3");
+                break;
+            case "TitleBtn":
+                DataManager.Instance.PlayBGM3();
+                Debug.Log("BGM 재생됨3");
+                break;
+            case "ExitBtn":
+                DataManager.Instance.PlayBGM3();
+                Debug.Log("BGM 재생됨3");
                 break;
             default:
                 break;
@@ -109,8 +127,8 @@ public class ClickBtn : MonoBehaviour , IPointerClickHandler
                 case "체력 증가":
                     tempSkillName = SkillName.IncreaseHealthBtn;
                     break;
-                case "건강 재생 증가":
-                    tempSkillName = SkillName.IncreaseBodyRecoveryBtn;
+                case "체력 재생 증가":
+                    tempSkillName = SkillName.IncreaseHealthRecoveryBtn;
                     break;
                 case "골드 획득량 증가":
                     tempSkillName = SkillName.IncreaseGoldProsperityBtn;

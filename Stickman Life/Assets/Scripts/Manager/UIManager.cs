@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using Unity.VisualScripting;
+using UnityEngine.SceneManagement;
 
 [System.Serializable]
 public struct ShopStatus
@@ -62,7 +63,7 @@ public class UIManager : MonoBehaviour
     //에러
     public TMP_Text errorText;
 
-    public Stopwatch stopwatch;
+    public MainStopwatch stopwatch;
 
     private MainData mainData;
 
@@ -89,7 +90,27 @@ public class UIManager : MonoBehaviour
     public Button speedTwiceBtn;
     public bool onSpeedTwice;
 
+    // 자동저장
+    public float nowTimer = 0;
+    public float maxTimer = 30;
 
+    public bool isInit = false;
+    public bool isMenuOpen = false;
+
+    // 사망 상태창
+    public GameObject GameOver;
+
+    private bool IsMaxLevel()
+    {
+        if (mainData.level >= mainData.maxLevel)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
 
     public void Init(MainData mainData)
     {
@@ -99,45 +120,50 @@ public class UIManager : MonoBehaviour
         hobby = new Hobby(mainData);
         eat = new Eat(mainData);
         work = new Work(mainData);
-        stopwatch = gameObject.AddComponent<Stopwatch>();
+        stopwatch = gameObject.AddComponent<MainStopwatch>();
         stopwatch.StopwatchInit(timeText);
+        stopwatch.Init(mainData.timeSpan);
         stopwatch.PlayStopwatch();
+
+        UpdateButttons(nameof(SkillName.IncreaseLifeBtn));
+        UpdateButttons(nameof(SkillName.IncreaseHealthBtn));
+        UpdateButttons(nameof(SkillName.IncreaseHealthRecoveryBtn));
+        UpdateButttons(nameof(SkillName.IncreaseGoldProsperityBtn));
+
+
+        if(IsMaxLevel())
+        {
+            mainData.isMaxLevel = true;
+        }
+        isInit = true;
     }
 
     private void Start()
     {
         playerCondition = playerCondition = new PlayerCondition(mainData);
+        SaveData();
+    }
+
+    public void Quit()
+    {
+        SaveData();
+        Application.Quit();
     }
 
     private void Update()
     {
-        if (Application.platform == RuntimePlatform.Android)
+        if (!isInit)
         {
-            if (Input.GetKey(KeyCode.Escape))
-            {
-                Debug.Log("Escape를 눌러따");
-                if (!DataManager.Instance.gameManager.IsPause)
-                {
-                    OpenMenuWindow();
-                } else
-                {
-                    CloseMenuWindow();
-                }
-            }
-        } else if(Application.platform == RuntimePlatform.WindowsEditor)
+            return;
+        }
+
+        nowTimer += Time.deltaTime;
+
+        if(nowTimer > maxTimer)
         {
-            if (Input.GetKey(KeyCode.Escape))
-            {
-                Debug.Log("Escape를 눌러따");
-                if (!DataManager.Instance.gameManager.IsPause)
-                {
-                    OpenMenuWindow();
-                }
-                else
-                {
-                    CloseMenuWindow();
-                }
-            }
+            nowTimer = 0;
+            SaveData();
+            PrintError("게임 데이터가 저장되었습니다.");
         }
 
         //캐릭터 상태 모습 표시
@@ -150,7 +176,8 @@ public class UIManager : MonoBehaviour
                 ChangeHealthBarText(0);
                 ChangeMentalBarTextt(0);
                 ChangeFoodBarText(0);
-                DataManager.Instance.gameManager.PauseGame();
+                DataManager.Instance.gameManager.EndGame();
+                GameOver.gameObject.SetActive(true);
                 break;
             case PlayerStatus.playerDisease:
                 player.ChangePlayerDiseaseImg();
@@ -185,7 +212,6 @@ public class UIManager : MonoBehaviour
 
         if (mainData.therapyBool)
         {
-            Debug.Log("치료 실행!!ui");
             therapy.Play(null);
             mainData.therapyBool = false;
         }
@@ -210,6 +236,8 @@ public class UIManager : MonoBehaviour
         {
             ChangeBodyBarTextVer2();
         }
+
+        mainData.timeSpan = stopwatch.totalSeconds;
     }
 
     #region 버튼들 변화하는 메소드 정의
@@ -581,6 +609,8 @@ public class UIManager : MonoBehaviour
     {
         menuUIObj.SetActive(true);
         DataManager.Instance.gameManager.PauseGame();
+        isMenuOpen = true;
+        Invoke("ResetMenuTimer", 1f);
     }
 
     public void CloseMenuWindow()
@@ -589,6 +619,10 @@ public class UIManager : MonoBehaviour
         DataManager.Instance.gameManager.ContinueGame();
     }
 
+    public void ResetMenuTimer()
+    {
+        isMenuOpen = false;
+    }
 
     #endregion
 
@@ -624,7 +658,59 @@ public class UIManager : MonoBehaviour
         DataManager.Instance.PlayBGM2();
     }
 
-    public void OFFButtons(string buttonType)
+    public void UpdateButttons(string buttonType)
+    {
+        switch (buttonType)
+        {
+            case nameof(SkillName.IncreaseLifeBtn):
+                if(DataManager.Instance.IsMaxLevel(buttonType))
+                {
+                    LifeUpObj.transform.GetChild(0).GetChild(2).GetComponent<TMP_Text>().text = $"LV Max";
+                    OFFButtons(nameof(SkillType.생명력증가));
+                } else
+                {
+                    LifeUpObj.transform.GetChild(0).GetChild(2).GetComponent<TMP_Text>().text = $"LV {mainData.lifeUpLevel}";
+                }
+                break;
+            case nameof(SkillName.IncreaseHealthBtn):
+                if (DataManager.Instance.IsMaxLevel(buttonType))
+                {
+                    healthUpObj.transform.GetChild(0).GetChild(2).GetComponent<TMP_Text>().text = $"LV Max";
+                    OFFButtons(nameof(SkillType.체력증가));
+                }
+                else
+                {
+                    healthUpObj.transform.GetChild(0).GetChild(2).GetComponent<TMP_Text>().text = $"LV {mainData.healthUpLevel}";
+                }
+                break;
+            case nameof(SkillName.IncreaseHealthRecoveryBtn):
+                if (DataManager.Instance.IsMaxLevel(buttonType))
+                {
+                    healthRecoveryObj.transform.GetChild(0).GetChild(2).GetComponent<TMP_Text>().text = $"LV Max";
+                    OFFButtons(nameof(SkillType.체력재생증가));
+                }
+                else
+                {
+                    healthRecoveryObj.transform.GetChild(0).GetChild(2).GetComponent<TMP_Text>().text = $"LV {mainData.healthRepairLevel}";
+                }
+                break;
+            case nameof(SkillName.IncreaseGoldProsperityBtn):
+                if (DataManager.Instance.IsMaxLevel(buttonType))
+                {
+                    increaseGoldObj.transform.GetChild(0).GetChild(2).GetComponent<TMP_Text>().text = $"LV Max";
+                    OFFButtons(nameof(SkillType.골드획득량증가));
+                }
+                else
+                {
+                    increaseGoldObj.transform.GetChild(0).GetChild(2).GetComponent<TMP_Text>().text = $"LV {mainData.goldUpLevel}";
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+        public void OFFButtons(string buttonType)
     {
         switch (buttonType)
         {
@@ -821,4 +907,27 @@ public class UIManager : MonoBehaviour
     }
 
     #endregion
+
+    #region 기타
+    public void SaveData()
+    {
+        mainData.timeSpan = stopwatch.totalSeconds;
+        DataManager.Instance.SaveData(mainData);
+    }
+
+    public void GotoMenu()
+    {
+        SaveData();
+        PlayerPrefs.SetInt("Load", (int)LoadDataStatus.Title);
+        SceneManager.LoadScene("Loading");
+    }
+
+    public void Retry()
+    {
+        DataManager.Instance.Delete();
+        PlayerPrefs.SetInt("Load", (int)LoadDataStatus.Load);
+        SceneManager.LoadScene("Loading");
+    }
+    #endregion
+
 }

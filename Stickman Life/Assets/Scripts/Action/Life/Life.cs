@@ -113,15 +113,16 @@ public class Life : Action
 
     public void DownLifePointForFood(float timer)
     {
+        var minus = 5;
 
         foodNowTimer += timer;
         if (foodNowTimer >= foodMaxTimer)
         {
-            Debug.Log($"포만감 소진으로 인한 생명력 : {foodNowTimer}마다 {10}만큼 감소됨");
+            Debug.Log($"포만감 소진으로 인한 생명력 : {foodNowTimer}마다 {minus}만큼 감소됨");
             foodNowTimer = 0;
 
-            mainData.SetLifePoint(mainData.GetLifePoint() - 10 <= 0 ?
-                0 : mainData.GetLifePoint() - 10
+            mainData.SetLifePoint(mainData.GetLifePoint() - minus <= 0 ?
+                0 : mainData.GetLifePoint() - minus
                 );
 
             DataManager.Instance.uiManager.ChangeLifeBarText(mainData.GetLifePoint());

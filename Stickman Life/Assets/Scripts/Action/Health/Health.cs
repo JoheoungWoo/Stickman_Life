@@ -56,7 +56,7 @@ public class Health : Action
         additionalCurrentHealthTimer += timer;
         if (additionalCurrentHealthTimer >= additionalMaxHealthTimer)
         {
-            Debug.Log($"추가건강회복은 {additionalCurrentHealthTimer} 만큼의 딜레이 마다 {upHealth} 회복");
+            Debug.Log($"추가체력회복은 {additionalCurrentHealthTimer} 만큼의 딜레이 마다 {upHealth} 회복");
             additionalCurrentHealthTimer = 0;
 
             mainData.SetHealthPoint(mainData.GetHealthPoint() + upHealth >= mainData.maxHealthPoint ?

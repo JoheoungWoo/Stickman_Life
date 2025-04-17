@@ -17,13 +17,14 @@ public class Mental : Action
         CheckMentalPoint();
     }
 
-    public void CheckHallucination()
+    public void CheckHallucination(bool isHallucination)
     {
-        if (mainData.isHallucination && mainData.GetBodyPoint() > 50)
+        if(isHallucination)
         {
-            mainData.SetFoodPoint(50);
+            Debug.Log("»Ø∞¢¿”");
         }
     }
+
 
     public void CheckMentalPoint()
     {
